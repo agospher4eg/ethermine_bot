@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import telebot, get_data_from_ethermine, get_data_from_https, datetime,
+import telebot, get_data_from_ethermine, get_data_from_https, datetime
 from additional_data import telegram_token
 _el_typing_time=15
 _el_date=str((datetime.date.today()))

@@ -118,4 +118,4 @@ Time: {}
     return(itog)
 
 
-#print(get_weather_by_city_id(524901))
+print(get_weather_by_city_id(524901))
