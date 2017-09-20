@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import telebot, get_data_from_ethermine, get_data_from_https, datetime
-from additional_data import telegram_token
+from additional_data import telegram_token,author_id
+
+debug_level='DEBUG'
 _el_typing_time=15
 _el_date=str((datetime.date.today()))
 _el_token=telegram_token
 _bot=telebot.TeleBot(_el_token)
-#_bot.send_message(162858598,444)
-#_upd=_bot.get_updates(_bot)
-#print(_el_token)
+#_bot=telebot.AsyncTeleBot(_el_token)
+
 
 print(_bot.get_me())
 
@@ -15,18 +16,18 @@ def _log(message, ans):
     print('\n ----------')
     from datetime import datetime
     print(datetime.now())
-    #print("Сообщение от {1}".format(message.from_user.first_name))
     print(message.from_user.first_name)
     print(message.from_user.last_name)
     print(str(message.from_user.id))
     print(message.text)
     print(ans)
-    #print(message)
-
+    if debug_level=='DEBUG':
+        _bot.forward_message(author_id, message.from_user.id, message.message_id)
 
 def _el_action(chat_id, times, action_type):
     for i in range(times):
         _bot.send_chat_action(chat_id, action_type)
+
 
 @_bot.message_handler(commands=['start'])
 def handle_start(message):
@@ -68,19 +69,18 @@ def handle_text(message):
 def handle_text(message):
     _el_action(message.chat.id, _el_typing_time, 'typing')
     ans=get_data_from_ethermine.get_new_info('B5304d577494e21Be4fdb13e603248a4A4c61c28')
-    _bot.send_message(message.chat.id, ans,parse_mode='HTML')
-    _log(message,ans)
-    ans=get_data_from_ethermine.get_pool_stats()
-    _bot.send_message(message.chat.id, ans,parse_mode='HTML')
-    _log(message,ans)
-    ans=get_data_from_https.get_curs(_el_date)
+    ans=ans+'\n'+get_data_from_ethermine.get_pool_stats()
+    ans=ans+'\n'+get_data_from_https.get_curs(_el_date)
     _bot.send_message(message.chat.id, ans,parse_mode='HTML')
     _log(message,ans)
 
 @_bot.message_handler(commands=['get_weather'])
 def handle_text(message):
     _el_action(message.chat.id, _el_typing_time, 'typing')
-    ans=get_data_from_https.get_weather_by_city_id(524901)
+    try:
+        ans=get_data_from_https.get_weather_by_city_id(524901)
+    except:
+        ans='error while getting weather'
     _bot.send_message(message.chat.id, ans,parse_mode='HTML')
     _log(message,ans)
 
@@ -110,6 +110,10 @@ def handle_text(message):
         _bot.send_message(message.chat.id, _answer)
         _log(message, _answer)
     print(_new_msg+' '+_answer)
+
+
+_bot.send_message(author_id, '123' ,parse_mode='HTML')
+
 
 _bot.polling(none_stop=True,interval=0)
 

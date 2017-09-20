@@ -45,5 +45,5 @@ def get_pool_stats():
     data = json.loads(responce)
     usd = data['data']['price']['usd']
     btc = data['data']['price']['btc']
-    itog = 'USD: <b>{}</b> \nBTC: <b> {}</b> '.format(usd,btc)
+    itog = 'USD: <b>{}</b> \nBTC: <b> {}</b> \n'.format(usd,btc)
     return(itog)
