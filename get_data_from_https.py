@@ -37,7 +37,7 @@ def get_curs(el_date):
                 eur_price = vcurs
             #print(el_date,vcode,vchcode,vcurs,roworder,vname)
     itog='Date: {}\nUSD <b>{}</b>\nEUR <b>{}</b>'.format(el_date,usd_price,eur_price)
-    return(itog)
+    return(itog,usd_price)
 
 el_city=524901
 

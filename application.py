@@ -68,9 +68,22 @@ def handle_text(message):
 @_bot.message_handler(commands=['eth_all'])
 def handle_text(message):
     _el_action(message.chat.id, _el_typing_time, 'typing')
-    ans=get_data_from_ethermine.get_new_info('B5304d577494e21Be4fdb13e603248a4A4c61c28')
-    ans=ans+'\n'+get_data_from_ethermine.get_pool_stats()
-    ans=ans+'\n'+get_data_from_https.get_curs(_el_date)
+
+    pool=get_data_from_ethermine.get_new_info('B5304d577494e21Be4fdb13e603248a4A4c61c28')
+    unpaid = pool[1]
+    ans=pool[0]
+
+    stats=get_data_from_ethermine.get_pool_stats()
+    ans=ans+'\n'+stats[0]
+    usd=stats[1]
+
+    curs=get_data_from_https.get_curs(_el_date)
+    rub_to_usd=curs[1]
+    ans=ans+'\n'+curs[0]
+
+    profit=float(unpaid)*float(usd)*float(rub_to_usd)
+    profit=round(profit,2)
+    ans=ans+'\n'+str(profit)
     _bot.send_message(message.chat.id, ans,parse_mode='HTML')
     _log(message,ans)
 
@@ -112,7 +125,7 @@ def handle_text(message):
     print(_new_msg+' '+_answer)
 
 
-_bot.send_message(author_id, '123' ,parse_mode='HTML')
+_bot.send_message(author_id, 'Bot started' ,parse_mode='HTML')
 
 
 _bot.polling(none_stop=True,interval=0)

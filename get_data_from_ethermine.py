@@ -33,7 +33,7 @@ Average Hashrate: {}
 Active Workers: {}
 Unpaid: <b>{}</b>
 '''.format(status,time,last_seen,reported_hashrate,current_hashrate,average_hashrate,active_workers,unpaid,)
-    return(itog)
+    return(itog,str(unpaid))
 
 def get_pool_stats():
     conn = http.client.HTTPSConnection("api.ethermine.org")
@@ -46,4 +46,6 @@ def get_pool_stats():
     usd = data['data']['price']['usd']
     btc = data['data']['price']['btc']
     itog = 'USD: <b>{}</b> \nBTC: <b> {}</b> \n'.format(usd,btc)
-    return(itog)
+    return(itog,str(usd))
+
+#print(get_pool_stats()[1])
