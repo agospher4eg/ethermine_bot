@@ -15,7 +15,6 @@ def get_curs(el_date):
     soapResponse = connection.getresponse()
     resp = soapResponse.read()
     connection.close()
-    #resp=resp[2:len(resp)-1]
     root = ET.fromstring(resp)
 
     body=root.find('{http://www.w3.org/2003/05/soap-envelope}Body')
@@ -38,10 +37,6 @@ def get_curs(el_date):
             #print(el_date,vcode,vchcode,vcurs,roworder,vname)
     itog='Date: {}\nUSD <b>{}</b>\nEUR <b>{}</b>'.format(el_date,usd_price,eur_price)
     return(itog,usd_price)
-
-el_city=524901
-
-#openweathermap.org
 
 def humanliketime(a):
     b=datetime.datetime.fromtimestamp(int(a)).strftime('%Y-%m-%d %H:%M:%S')
@@ -113,9 +108,8 @@ Sunrise: {}
 Sunset: {}
 Weather Condition: {} - {}
 Time: {}
-    '''.format(city_name,temp_min, temp_max, temp,pressure,humidity,clouds, visib,wind_speed,wind_deg,sunrise,sunset,clou1,clou2,dt))
+    '''.format(city_name,temp_min, temp_max, temp,pressure,humidity,clouds, visib,
+               wind_speed,wind_deg,sunrise,sunset,clou1,clou2,dt))
 
     return(itog)
 
-
-#print(get_weather_by_city_id(524901))

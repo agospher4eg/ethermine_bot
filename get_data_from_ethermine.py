@@ -1,4 +1,5 @@
 import http.client, datetime, json
+
 def humanliketime(a):
     b=datetime.datetime.fromtimestamp(int(a)).strftime('%Y-%m-%d %H:%M:%S')
     return b
@@ -33,7 +34,7 @@ Average Hashrate: {}
 Active Workers: {}
 Unpaid: <b>{}</b>
 '''.format(status,time,last_seen,reported_hashrate,current_hashrate,average_hashrate,active_workers,unpaid,)
-    return(itog,str(unpaid))
+    return(itog,str(unpaid),status)
 
 def get_pool_stats():
     conn = http.client.HTTPSConnection("api.ethermine.org")
@@ -48,4 +49,20 @@ def get_pool_stats():
     itog = 'USD: <b>{}</b> \nBTC: <b> {}</b> \n'.format(usd,btc)
     return(itog,str(usd))
 
-#print(get_pool_stats()[1])
+def ethermine_paid(mine):
+    conn = http.client.HTTPSConnection("api.ethermine.org")
+    _el_url='/miner/{miner}/payouts'.format(miner=mine)
+    conn.request("GET", _el_url)
+    r1 = conn.getresponse()
+    responce = r1.read()
+    conn.close()
+    data = json.loads(responce)
+    data_d = data['data']
+    paid=0
+    for n in range (0,len(data_d)):
+        paid=+data_d[n]['amount']
+    paid=round(float(paid) / 1000000000000000000, 4)
+    return(paid)
+
+
+#print(ethermine_paid(ethermine_token))
