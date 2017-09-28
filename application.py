@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import telebot, get_data_from_ethermine, get_data_from_https, datetime
-from additional_data import telegram_token,author_id,ethermine_token,default_weather_city_id
+import telebot, get_data_from_ethermine, get_data_from_https, datetime,registration_module
+from additional_data import telegram_token,author_id,default_weather_city_id
 
 debug_level='DEBUG'
 _el_typing_time=15
@@ -26,38 +26,27 @@ def _el_action(chat_id, times, action_type):
     for i in range(times):
         _bot.send_chat_action(chat_id, action_type)
 
-user_dict = {}
-
-class User:
-    def __init__(self, name):
-        self.name = name
-        #self.age = None
-        #self.sex = None
-
 @_bot.message_handler(commands=['register'])
 def handle_start(message):
-    msg = _bot.reply_to(message, """\
-    Hi there, I am Example bot.
-    What's your name?
-    """)
+    msg = _bot.reply_to(message, 'Enter your token:')
     _bot.register_next_step_handler(msg, process_name_step)
+    _log(message, 'registration in progress')
 
 def process_name_step(message):
     try:
-        chat_id = message.chat.id
-        name = message.text
-        print(user_dict)
-        user_dict[chat_id]=[name]
-        print(user_dict)
-
-    except Exception as e:
-        _bot.reply_to(message, 'oooops')
+        answer=registration_module.write_to_json(message.from_user.id, message.text)
+        _bot.send_message(message.from_user.id, answer)
+        _log(message, answer)
+    except:
+        answer='oooops'
+        _bot.reply_to(message, answer)
+        _log(message, answer)
 
 @_bot.message_handler(commands=['start'])
 def handle_start(message):
     user_markup=telebot.types.ReplyKeyboardMarkup(True, False)
-    user_markup.row('/start','/get_weather','/stop')
-    user_markup.row('/eth_stats', '/eth_rates', '/eth_all')
+    user_markup.row('/start','/help','/stop')
+    user_markup.row('/get_statistics','/get_weather')
     answer='Welcome!'
     _bot.send_message(message.from_user.id,answer , reply_markup=user_markup)
     _log(message, answer)
@@ -67,49 +56,36 @@ def handle_start(message):
     hide_markup=telebot.types.ReplyKeyboardRemove()
     _bot.send_message(message.from_user.id, 'hide keyboard', reply_markup=hide_markup)
 
-@_bot.message_handler(commands=['eth_stats'])
-def handle_text(message):
-    try:
-        ans=get_data_from_ethermine.get_new_info(ethermine_token)
-    except:
-        ans='error getting stats'
-
-    _el_action(message.chat.id,_el_typing_time,'typing')
-    _bot.send_message(message.chat.id, ans,parse_mode='HTML')
-    _log(message,ans)
-
-@_bot.message_handler(commands=['eth_rates'])
+@_bot.message_handler(commands=['get_statistics'])
 def handle_text(message):
     _el_action(message.chat.id, _el_typing_time, 'typing')
-    ans=get_data_from_ethermine.get_pool_stats()
-    _bot.send_message(message.chat.id, ans,parse_mode='HTML')
-    _log(message,ans)
+    tele_id=str(message.from_user.id)
+    if registration_module.user_dict.get(tele_id)==None:
+        ans='please /register'
+        _bot.send_message(message.chat.id, ans, parse_mode='HTML')
+        _log(message, ans)
+    else:
+        ethermine_tokens=registration_module.user_dict[tele_id]
+        for n in range (0,len(ethermine_tokens)):
+            pool=get_data_from_ethermine.get_new_info(ethermine_tokens[n])
+            unpaid = pool[1]
 
-    ans=get_data_from_https.get_curs(_el_date)
-    _bot.send_message(message.chat.id, ans,parse_mode='HTML')
-    _log(message,ans)
+            stats=get_data_from_ethermine.get_pool_stats()
+            usd=stats[1]
 
-@_bot.message_handler(commands=['eth_all'])
-def handle_text(message):
-    _el_action(message.chat.id, _el_typing_time, 'typing')
+            curs=get_data_from_https.get_curs(_el_date)
+            rub_to_usd=curs[1]
 
-    pool=get_data_from_ethermine.get_new_info(ethermine_token)
-    unpaid = pool[1]
+            paid=get_data_from_ethermine.ethermine_paid(ethermine_tokens[n])
+            total = float(unpaid) + float(paid)
+            profit=total*float(usd)*float(rub_to_usd)
+            profit=(round(profit,2))
 
-    stats=get_data_from_ethermine.get_pool_stats()
-    usd=stats[1]
 
-    curs=get_data_from_https.get_curs(_el_date)
-    rub_to_usd=curs[1]
-
-    paid=get_data_from_ethermine.ethermine_paid(ethermine_token)
-
-    profit=(float(unpaid)+paid)*float(usd)*float(rub_to_usd)
-    profit=(round(profit,2))
-
-    ans='{}Paid: <b>{}</b>\n\n{}\n{}\n\nProfit: <b>{:7,.2f}</b> RUB'.format(pool[0],paid,stats[0],curs[0],profit)
-    _bot.send_message(message.chat.id, ans,parse_mode='HTML')
-    _log(message,ans)
+            ans='<b>{}</b>\n\n{}Paid: <b>{}</b>\nTotal: <b>{}</b>\n\n{}\n{}\n\nProfit: <b>{:7,.2f}</b> RUB'.format(ethermine_tokens[n],
+            pool[0],paid,total,stats[0],curs[0],profit)
+            _bot.send_message(message.chat.id, ans,parse_mode='HTML')
+            _log(message,ans)
 
 @_bot.message_handler(commands=['get_weather'])
 def handle_text(message):
@@ -124,7 +100,8 @@ def handle_text(message):
 @_bot.message_handler(commands=['help'])
 def handle_text(message):
     _el_action(message.chat.id, _el_typing_time, 'typing')
-    _answer = 'Вот тут будет крутая справка'
+    _answer = 'This bot will get statistics from ethermine.org for you\nTo start push /register\nYou can register \
+many tokens'
     _bot.send_message(message.chat.id, _answer)
     _log(message,_answer)
 
@@ -145,6 +122,7 @@ def inline(c):
         print('123')
         _bot.send_message(author_id,'123')
 
+""""
 @_bot.message_handler(content_types=['text'])
 def handle_text(message):
     _new_msg=message.text
@@ -165,7 +143,7 @@ def handle_text(message):
         _log(message, _answer)
     print(_new_msg+' '+_answer)
 
-
+"""
 
 
 
