@@ -67,6 +67,7 @@ def get_weather_by_city_id(city_id):
     conn.request("GET", _el_url)
     r1 = conn.getresponse()
     data1 = r1.read()
+    print(data1)
     conn.close()
 
     data=json.loads(data1)
@@ -85,7 +86,12 @@ def get_weather_by_city_id(city_id):
     visib=data['visibility']
     wind=data['wind']
     wind_speed=wind.get('speed')
-    wind_deg=humanlike_wind(wind.get('deg'))
+    #wind_deg=humanlike_wind(wind.get('deg'))
+    wind_deg=wind.get('deg')
+    try:
+        wind_deg = humanlike_wind(wind_deg)
+    except:
+        wind_deg = 'no wind'
     clouds=data['clouds'].get('all')
     sys=data['sys']
     sunrise=humanliketime(sys.get('sunrise'))[11:20]
@@ -112,4 +118,3 @@ Time: {}
                wind_speed,wind_deg,sunrise,sunset,clou1,clou2,dt))
 
     return(itog)
-
