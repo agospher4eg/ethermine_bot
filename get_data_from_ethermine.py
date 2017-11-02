@@ -15,17 +15,18 @@ def get_new_info(mine):
     conn.close()
 
     data = json.loads(responce)
-    #print(data)
+    print(data)
     status=data['status']
-    if status=='OK':
-        data_d=data['data']
-        reported_hashrate=round(float(data_d['reportedHashrate'])/1000000,2)
-        current_hashrate=round(float(data_d['currentHashrate'])/1000000,2)
-        average_hashrate = round(float(data_d['averageHashrate'])/1000000,2)
-        time = humanliketime(data_d['time'])
-        last_seen = humanliketime(data_d['lastSeen'])
-        unpaid = round(float(data_d['unpaid'])/1000000000000000000,4)
-        active_workers = data_d['activeWorkers']
+    data = data['data']
+    if status=='OK' and data!='NO DATA':
+
+        reported_hashrate=round(float(data['reportedHashrate'])/1000000,2)
+        current_hashrate=round(float(data['currentHashrate'])/1000000,2)
+        average_hashrate = round(float(data['averageHashrate'])/1000000,2)
+        time = humanliketime(data['time'])
+        last_seen = humanliketime(data['lastSeen'])
+        unpaid = round(float(data['unpaid'])/1000000000000000000,4)
+        active_workers = data['activeWorkers']
 
         itog='''Status: <b>{}</b>
 Time: {}
@@ -37,8 +38,8 @@ Active Workers: {}
 Unpaid: <b>{}</b>
 '''.format(status,time,last_seen,reported_hashrate,current_hashrate,average_hashrate,active_workers,unpaid,)
     else:
-        itog='error'
-        unpaid='error'
+        itog='NO DATA'
+        unpaid='NO DATA'
     return(itog,str(unpaid),status)
 
 def get_pool_stats():
@@ -65,6 +66,9 @@ def ethermine_paid(mine):
     data_d = data['data']
     paid=0
     for n in range (0,len(data_d)):
-        paid=+data_d[n]['amount']
+        paid+=data_d[n]['amount']
     paid=round(float(paid) / 1000000000000000000, 4)
     return(paid)
+
+
+#print(get_new_info('B5304d577494e21Be4fdb13e603248a4A4c61c28'))

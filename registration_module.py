@@ -16,6 +16,7 @@ def add_to_user_dict(tele_id,value):
     global user_dict
     if get_data_from_ethermine.get_new_info(value)[2].strip()=='OK':
         first_responce='good token'
+        print(first_responce)
         if user_dict.get(tele_id)==None:
             user_dict[tele_id]=[value]
             second_responce='new key: {} the value was added: {}'.format(tele_id, value)
@@ -44,3 +45,6 @@ def write_to_json(tele_id,value):
         #print(resp)
     return(resp)
 
+
+
+#print(get_data_from_ethermine.get_new_info('5F204c52586AF2d2457AD37b15d67E41184e3D1d'))

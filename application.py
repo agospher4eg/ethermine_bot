@@ -77,12 +77,20 @@ def handle_text(message):
             rub_to_usd=curs[1]
 
             paid=get_data_from_ethermine.ethermine_paid(ethermine_tokens[n])
+            try:
+                unpaid=float(unpaid)
+            except:
+                unpaid=0
+            try:
+                paid=float(paid)
+            except:
+                paid=0
             total = float(unpaid) + float(paid)
             profit=total*float(usd)*float(rub_to_usd)
             profit=(round(profit,2))
 
 
-            ans='<b>{}</b>\n\n{}Paid: <b>{}</b>\nTotal: <b>{}</b>\n\n{}\n{}\n\nProfit: <b>{:7,.2f}</b> RUB'.format(ethermine_tokens[n],
+            ans='<b>{}</b>\n\n{}\nPaid: <b>{}</b>\nTotal: <b>{}</b>\n\n{}\n{}\n\nProfit: <b>{:7,.2f}</b> RUB'.format(ethermine_tokens[n],
             pool[0],paid,total,stats[0],curs[0],profit)
             _bot.send_message(message.chat.id, ans,parse_mode='HTML')
             _log(message,ans)
